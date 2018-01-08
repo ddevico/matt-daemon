@@ -1,10 +1,9 @@
 # matt-daemon
 
-This project is an initiation to system and network administration. It's divided into 3 parts :
+This project is an introduction to the concept of daemon.
 
-### Network
-
-16 questions to discover usual network administration tools such as netstat or nslookup (Mac Os).
+Code a small program - a deamon- to process and store the received messages on a specific port,
+opened by this daemon exactly.
 
 # Start the program
 
