@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/09 12:09:36 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/09 12:35:10 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ void loop (int sock)
 			goto readClients;
 		}
 		reporter->print_log("INFO", "New client");
+		test_pass(newsock);
 		clients.push_back(newsock);
 		tmp.fd = newsock;
 		tmp.events = POLLIN | POLLPRI;
@@ -92,7 +93,6 @@ readClients:
 		{
 			ssize_t result;
 			char res;
-			test_pass(clients[i]);
 			while ((result = recv(clients[i], &res, 1, 0)) > 0)
 			{
 				if (res == '\n')
