@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:03:50 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:05:15 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,6 +233,27 @@ bool checkdir()
 
 void run(int fd)
 {
+	if (chdir("/") == -1)
+	{
+		reporter->print_log("ERROR", "Can't chdir to /");
+		exit(EXIT_FAILURE);
+	}
+	if (setsid() == -1)
+	{
+		reporter->print_log("ERROR", "Can't setsid");
+		exit(EXIT_FAILURE);
+	}
+	int nullop = open("/dev/null", O_RDWR);
+	if (nullop == -1)
+	{
+		reporter->print_log("ERROR", "Can't open /dev/null");
+		exit(EXIT_FAILURE);
+	}
+	if (dup2(nullop, 0) == -1 || dup2(nullop, 1) == -1 || dup2(nullop, 2) == -1)
+	{
+		reporter->print_log("ERROR", "can't redirect stdin/stdout/stderr to /dev/null");
+		exit(EXIT_FAILURE);
+	}
 	listen();
 	if (flock(fd, LOCK_UN | LOCK_NB) == -1)
 	{
