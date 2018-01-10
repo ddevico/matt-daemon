@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:00:04 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:01:39 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ void listen()
 	int sockfd;
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
-		reporter->error("Failed to create socket");
+		reporter->print_log("ERROR", "Failed to create socket");
 		return;
 	}
 	struct sockaddr_in server_addr;
@@ -171,27 +171,27 @@ void listen()
 	if (bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
 		close(sockfd);
-		reporter->error("Failed to bind socket");
+		reporter->print_log("ERROR", "Failed to bind socket");
 		return;
 	}
 	if (listen(sockfd, 255) == -1)
 	{
 		close(sockfd);
-		reporter->error("Failed to listen socket");
+		reporter->print_log("ERROR", "Failed to listen socket");
 		return;
 	}
 	int flags = fcntl(sockfd, F_GETFL, 0);
 	if (flags < 0)
 	{
 		close(sockfd);
-		reporter->error("Failed to set non blocking socket on client");
+		reporter->print_log("ERROR", "Failed to set non blocking socket on client");
 		return;
 	}
 	flags |= O_NONBLOCK;
 	if (fcntl(sockfd, F_SETFL, flags) == -1)
 	{
 		close(sockfd);
-		reporter->error("Failed to set non blocking socket");
+		reporter->print_log("ERROR", "Failed to set non blocking socket");
 		return;
 	}
 	reporter->print_log("INFO", "Server Created");
