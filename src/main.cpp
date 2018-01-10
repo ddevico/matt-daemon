@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/09 12:35:10 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 10:03:56 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <poll.h>
 
 Tintin_reporter *reporter = NULL;
+int flag = 0;
 
 void				test_pass(int sock)
 {
@@ -36,18 +37,21 @@ void				test_pass(int sock)
 	ret = 0;
 	line = NULL;
 	buff[0] = '\0';
-	write (1, "test", 11);
-	while ((ret = recv(sock, buff, 1023, 0) > 0))
+	reporter->print_log("INFO", "Enter");
+	while ((ret = recv(sock, &buff, 999, 0)) > 0)
 	{
-		if (!(strcmp("admin:admin", buff)) || !(strcmp("admin:admin\n",
+		if (!(strcmp("admin:admin", buff)) && !(strcmp("admin:admin\n",
 			buff)))
 		{
-			send(sock, "OK", 2, 0);
-			break ;
+			reporter->print_log("ERROR", "Password incorrect");
+			exit(0);
+		}
+		else
+		{
+			reporter->print_log("INFO", "Password good");
+			return ;
 		}
 	}
-	send(sock, "WRONG_PASS", 10, 0);
-	exit(0);
 }
 
 void loop (int sock)
@@ -79,20 +83,49 @@ void loop (int sock)
 			reporter->print_log("INFO", "Client number limit reached");
 			goto readClients;
 		}
+		flag = 0;
 		reporter->print_log("INFO", "New client");
-		test_pass(newsock);
 		clients.push_back(newsock);
 		tmp.fd = newsock;
 		tmp.events = POLLIN | POLLPRI;
 		tmp.revents = 0;
 		polls.push_back(tmp);
 		datas.push_back(std::string());
-readClients:
-		poll(&polls.front(), polls.size(), 10);
+		readClients:
+		//poll(&polls.front(), polls.size(), 10);
 		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
 		{
 			ssize_t result;
 			char res;
+			if (flag == 0)
+			{
+				while ((result = recv(clients[i], &res, 1, MSG_NOSIGNAL)) > 0)
+				{
+					reporter->print_log("INFO", "Pass ?");
+					if (res == '\n')
+					{
+						if (!datas[i].compare("admin:admin") ||
+						!datas[i].compare("admin:admin\n"))
+						{
+							//send(clients[i], "OK", 2, 0);
+							reporter->print_log("INFO", "Password OK");
+							flag = 1;
+							break ;
+						}
+						else
+						{
+							//send(clients[i], "ERROR", 5, 0);
+							reporter->print_log("ERROR", "Password incorrect");
+							close(sock);
+							datas[i].clear();
+							exit(EXIT_FAILURE);
+						}
+					}
+					else
+						datas[i] += res;
+				}
+				datas[i].clear();
+			}
 			while ((result = recv(clients[i], &res, 1, 0)) > 0)
 			{
 				if (res == '\n')
@@ -132,15 +165,15 @@ void listen()
 	struct sockaddr_in server_addr;
 	std::memset((char *)&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(4243);
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(4242);
 	if (bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
 		close(sock);
 		reporter->print_log("ERROR", "Failed to bind socket");
 		return;
 	}
-	if (listen(sock, 255) == -1)
+	if (listen(sock, 222) == -1)
 	{
 		close(sock);
 		reporter->print_log("ERROR", "Failed to listen socket");
@@ -199,8 +232,6 @@ bool checkdir()
 
 void run(int fd)
 {
-	Signal_handler *signal_handler = new Signal_handler();
-	signal_handler->sig();
 	listen();
 	if (flock(fd, LOCK_UN | LOCK_NB) == -1)
 	{
@@ -208,6 +239,8 @@ void run(int fd)
 		reporter->print_log("ERROR", "Can't unlock LockFile");
 		exit(EXIT_FAILURE);
 	}
+	Signal_handler *signal_handler = new Signal_handler();
+	signal_handler->sig();
 	unlink("/var/lock/matt_daemon.lock");
 	reporter->print_log("INFO", "Quitting");
 }
