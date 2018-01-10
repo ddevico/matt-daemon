@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 11:45:21 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 11:55:45 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,12 @@ void loop (int sock)
 		int newsock;
 		if ((newsock = accept(sock, &sa, &sl)) == -1)
 		{
-			/*if (errno != EWOULDBLOCK && errno != EAGAIN)
+			if (errno != EWOULDBLOCK && errno != EAGAIN)
 			{
 				close(sock);
 				reporter->print_log("ERROR", "Failed to accept new client on socket");
 				return;
-			}*/
+			}
 			goto readClients;
 		}
 		if (clients.size() >= 3)
@@ -230,6 +230,27 @@ bool checkdir()
 
 void run(int fd)
 {
+	if (chdir("/") == -1)
+	{
+		reporter->print_log("Can't chdir to /");
+		exit(EXIT_FAILURE);
+	}
+	if (setsid() == -1)
+	{
+		reporter->print_log("Can't setsid");
+		exit(EXIT_FAILURE);
+	}
+	int nullop = open("/dev/null", O_RDWR);
+	if (nullop == -1)
+	{
+		reporter->print_log("Can't open /dev/null");
+		exit(EXIT_FAILURE);
+	}
+	if (dup2(nullop, 0) == -1 || dup2(nullop, 1) == -1 || dup2(nullop, 2) == -1)
+	{
+		reporter->print_log("can't redirect stdin/stdout/stderr to /dev/null");
+		exit(EXIT_FAILURE);
+	}
 	listen();
 	if (flock(fd, LOCK_UN | LOCK_NB) == -1)
 	{
