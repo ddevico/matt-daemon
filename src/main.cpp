@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:17:37 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:21:02 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void loop (int sock)
 		polls.push_back(tmp);
 		datas.push_back(std::string());
 		readClients:
-		//poll(&polls.front(), polls.size(), 10);
+		poll(&polls.front(), polls.size(), 10);
 		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
 		{
 			ssize_t result;
