@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:05:15 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:17:37 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void loop (int sock)
 		{
 			ssize_t result;
 			char res;
-			if (flag == 0)
+			/*if (flag == 0)
 			{
 				while ((result = recv(clients[i], &res, 1, MSG_NOSIGNAL)) > 0)
 				{
@@ -123,7 +123,7 @@ void loop (int sock)
 						datas[i] += res;
 				}
 				datas[i].clear();
-			}
+			}*/
 			while ((result = recv(clients[i], &res, 1, 0)) > 0)
 			{
 				if (res == '\n')
