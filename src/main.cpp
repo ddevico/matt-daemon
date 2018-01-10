@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 13:56:57 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 14:00:35 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,8 @@ void listen(int sock)
 	std::vector<struct pollfd> polls;
 	std::vector<int> clients;
 	std::vector<std::string> datas;
-	reporter->print_log("INFO", "Entering Daemon mode");
-	reporter->print_log("INFO", "started. PID: " + std::to_string(getpid()));
+	//reporter->print_log("INFO", "Entering Daemon mode");
+	//reporter->print_log("INFO", "started. PID: " + std::to_string(getpid()));
 	while (true)
 	{
 		struct sockaddr sa;
