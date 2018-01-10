@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:37:44 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:39:31 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,6 +332,8 @@ void run(int lockfd)
 		reporter->print_log("ERROR", "can't redirect stdin/stdout/stderr to /dev/null");
 		exit(EXIT_FAILURE);
 	}
+	Signal_handler *signal_handler = new Signal_handler();
+	signal_handler->sig();
 	reporter->print_log("INFO", "Signals binded, sucessfully daemonized");
 	listen();
 	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
