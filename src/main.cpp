@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:02:12 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:02:58 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ void loop (int sock)
 void listen()
 {
 	reporter->print_log("INFO", "Creating server");
-	struct pollfd tmp;
+	//struct pollfd tmp;
 	std::vector<struct pollfd> polls;
 	reporter->print_log("INFO", "Creating server");
 	int sockfd;
@@ -195,8 +195,8 @@ void listen()
 		return;
 	}
 	reporter->print_log("INFO", "Server Created");
-	loop(sock);
-	close(sock);
+	loop(sockfd);
+	close(sockfd);
 }
 
 bool checkdir()
