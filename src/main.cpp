@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 13:24:06 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 13:26:55 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,7 +194,15 @@ void listen()
 			reporter->print_log("INFO", "Client number limit reached");
 			goto readClients;
 		}
-
+		struct timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+		if (setsockopt(newsock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+		{
+			close(sock);
+			reporter->print_log("ERROR", "Failed setsockopt timeout");
+			return;
+		}
 		reporter->print_log("INFO", "New client");
 		clients.push_back(newsock);
 		tmp.fd = newsock;
