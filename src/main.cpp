@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 13:28:45 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 13:48:16 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,11 +128,11 @@ readClients:
 	}
 }
 
-void listen()
+void listen(int sock)
 {
 	struct pollfd tmp;
 	std::vector<struct pollfd> polls;
-	reporter->print_log("INFO", "Creating server");
+	/*reporter->print_log("INFO", "Creating server");
 	int sock;
 	if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
@@ -170,7 +170,7 @@ void listen()
 		reporter->print_log("ERROR", "Failed to set non blocking socket");
 		return;
 	}
-	reporter->print_log("INFO", "Created server");
+	reporter->print_log("INFO", "Created server");*/
 	std::vector<int> clients;
 	std::vector<std::string> datas;
 	while (true)
@@ -244,6 +244,50 @@ readClients:
 	close(sock);
 }
 
+int	connect_server()
+{
+	reporter->print_log("INFO", "Creating server");
+	int sock;
+	if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	{
+		reporter->print_log("ERROR", "Failed to create socket");
+		return (-1);
+	}
+	struct sockaddr_in server_addr;
+	std::memset((char *)&server_addr, 0, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(4242);
+	if (bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+	{
+		close(sock);
+		reporter->print_log("ERROR", "Failed to bind socket");
+		return (-1);
+	}
+	if (listen(sock, 222) == -1)
+	{
+		close(sock);
+		reporter->print_log("ERROR", "Failed to listen socket");
+		return (-1);
+	}
+	int flags = fcntl(sock, F_GETFL, 0);
+	if (flags < 0)
+	{
+		close(sock);
+		reporter->print_log("ERROR", "Failed to set non blocking socket on client");
+		return (-1);
+	}
+	flags |= O_NONBLOCK;
+	if (fcntl(sock, F_SETFL, flags) == -1)
+	{
+		close(sock);
+		reporter->print_log("ERROR", "Failed to set non blocking socket");
+		return (-1);
+	}
+	reporter->print_log("INFO", "Server Created");
+	return (sock);
+}
+
 
 bool checkdir()
 {
@@ -279,6 +323,7 @@ bool checkdir()
 
 void run(int lockfd)
 {
+	int sock;
 	if (chdir("/") == -1)
 	{
 		reporter->print_log("ERROR", "Can't chdir to /");
@@ -303,7 +348,8 @@ void run(int lockfd)
 	Signal_handler *signal_handler = new Signal_handler();
 	signal_handler->sig();
 	reporter->print_log("INFO", "Signals binded, sucessfully daemonized");
-	listen();
+	sock = connect_server();
+	listen(sock);
 	if (flock(lockfd, LOCK_UN | LOCK_NB) == -1)
 	{
 		reporter->print_log("ERROR", "Can't unlock: /var/lock/matt_daemon.lock");
