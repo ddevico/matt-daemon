@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/09 23:03:10 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 13:16:45 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,18 +56,16 @@ void	ft_putendl(std::string str)
 	write(1, "\n", 1);
 }
 
-static int				login_password(char **login, int sock)
+static int				login_password(char **login)
 {
 	char				*line;
 	char				*line2;
-	char				*res;
 	int					ret;
 
+	line = (char *)malloc(sizeof(char)* 1000);
 	if (!(line = (char *)malloc(sizeof(char)* 1000)))
 		exit(0);
 	if (!(line2 = (char *)malloc(sizeof(char)* 1000)))
-		exit(0);
-	if (!(res = (char *)malloc(sizeof(char)* 1000)))
 		exit(0);
 	ft_putendl("Login:");
 	ret = read(0, line, 999);
@@ -75,15 +73,22 @@ static int				login_password(char **login, int sock)
 	*login = strdup(line);
 	ft_putendl("Password:");
 	ret = read(0, line2, 999);
-	line2[ret] = '\0';
+	line2[ret - 1] = '\0';
 	line = ft_strjoin(line, ":");
 	line = ft_strjoin(line, line2);
-	send(sock, line, strlen(line) + 1, 0);
-	recv(sock, res, 1023, 0);
-	if (!strcmp(res, "ERROR"))
+	/*send(sock, line, strlen(line) + 1, 0);
+	recv(sock, line, 1023, 0);
+	ft_putstr(line);
+	if (strcmp(line, "ERROR"))
 	{
 		ft_putendl("ERROR: Wrong pass ...");
 		exit(1);
+	}*/
+	if ((strcmp("admin:admin", line)) && (strcmp("admin:admin\n",
+		line)))
+	{
+		ft_putstr("Password failed ");
+		exit (0);
 	}
 	ft_putstr("Welcome ");
 	ft_putendl(*login);
@@ -186,7 +191,7 @@ int main(int argc, char **argv)
 		if (check_args_client(port) != 0)
 			return (-1);
 		sock = create_client(argv[1], port);
-		if (login_password(&login, sock) == -1)
+		if (login_password(&login) == -1)
 			return (0);
 		client_prompt(sock, login);
 		close(sock);
