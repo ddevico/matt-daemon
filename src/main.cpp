@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 11:56:29 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:00:04 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,41 +154,44 @@ void loop (int sock)
 void listen()
 {
 	reporter->print_log("INFO", "Creating server");
-	int sock;
-	if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	struct pollfd tmp;
+	std::vector<struct pollfd> polls;
+	reporter->info("Creating server");
+	int sockfd;
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
-		reporter->print_log("ERROR", "Failed to create socket");
+		reporter->error("Failed to create socket");
 		return;
 	}
 	struct sockaddr_in server_addr;
 	std::memset((char *)&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(4242);
-	if (bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+	if (bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to bind socket");
+		close(sockfd);
+		reporter->error("Failed to bind socket");
 		return;
 	}
-	if (listen(sock, 222) == -1)
+	if (listen(sockfd, 255) == -1)
 	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to listen socket");
+		close(sockfd);
+		reporter->error("Failed to listen socket");
 		return;
 	}
-	int flags = fcntl(sock, F_GETFL, 0);
+	int flags = fcntl(sockfd, F_GETFL, 0);
 	if (flags < 0)
 	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to set non blocking socket on client");
+		close(sockfd);
+		reporter->error("Failed to set non blocking socket on client");
 		return;
 	}
 	flags |= O_NONBLOCK;
-	if (fcntl(sock, F_SETFL, flags) == -1)
+	if (fcntl(sockfd, F_SETFL, flags) == -1)
 	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to set non blocking socket");
+		close(sockfd);
+		reporter->error("Failed to set non blocking socket");
 		return;
 	}
 	reporter->print_log("INFO", "Server Created");
