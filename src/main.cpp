@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:24:28 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:31:20 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,8 +162,7 @@ void loop (int sock)
 
 void listen()
 {
-	reporter->print_log("INFO", "Creating server");
-	//struct pollfd tmp;
+	struct pollfd tmp;
 	std::vector<struct pollfd> polls;
 	reporter->print_log("INFO", "Creating server");
 	int sockfd;
@@ -203,10 +202,80 @@ void listen()
 		reporter->print_log("ERROR", "Failed to set non blocking socket");
 		return;
 	}
-	reporter->print_log("INFO", "Server Created");
-	loop(sockfd);
+	reporter->print_log("INFO", "Created server");
+	std::vector<int> clients;
+	std::vector<std::string> datas;
+	while (true)
+	{
+		struct sockaddr sa;
+		socklen_t sl;
+		int newsock;
+		if ((newsock = accept(sockfd, &sa, &sl)) == -1)
+		{
+			if (errno != EWOULDBLOCK && errno != EAGAIN)
+			{
+				close(sockfd);
+				reporter->print_log("ERROR", "Failed to accept new client on socket");
+				return;
+			}
+			goto readClients;
+		}
+		if (clients.size() >= 3)
+		{
+			close(newsock);
+			reporter->print_log("INFO", "Client number limit reached");
+			goto readClients;
+		}
+		struct timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 100000;
+		if (setsockopt(newsock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+		{
+			close(sockfd);
+			reporter->print_log("ERROR", "Failed setsockopt timeout");
+			return;
+		}
+		reporter->print_log("INFO", "New client");
+		clients.push_back(newsock);
+		tmp.fd = newsock;
+		tmp.events = POLLIN | POLLPRI;
+		tmp.revents = 0;
+		polls.push_back(tmp);
+		datas.push_back(std::string());
+readClients:
+		poll(&polls.front(), polls.size(), 10);
+		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
+		{
+			ssize_t result;
+			char res;
+			while ((result = recv(clients[i], &res, 1, MSG_NOSIGNAL)) > 0)
+			{
+				if (res == '\n')
+				{
+					if (!datas[i].compare("quit"))
+					{
+						close(sockfd);
+						reporter->print_log("INFO", "Request quit");
+						return;
+					}
+					reporter->print_log("INFO", "User input: " + datas[i]);
+					datas[i].clear();
+				}
+				else
+					datas[i] += res;
+			}
+			if (result == 0 || (result == -1 && errno != EWOULDBLOCK && errno != EAGAIN))
+			{
+				reporter->print_log("INFO", "Client shutdown");
+				clients.erase(clients.begin() + i);
+				datas.erase(datas.begin() + i);
+				i--;
+			}
+		}
+	}
 	close(sockfd);
 }
+
 
 bool checkdir()
 {
