@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 12:01:39 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 12:02:12 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void listen()
 	reporter->print_log("INFO", "Creating server");
 	struct pollfd tmp;
 	std::vector<struct pollfd> polls;
-	reporter->info("Creating server");
+	reporter->print_log("INFO", "Creating server");
 	int sockfd;
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
