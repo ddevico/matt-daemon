@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 11:36:34 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 11:45:21 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,12 @@ void loop (int sock)
 		int newsock;
 		if ((newsock = accept(sock, &sa, &sl)) == -1)
 		{
-			if (errno != EWOULDBLOCK && errno != EAGAIN)
+			/*if (errno != EWOULDBLOCK && errno != EAGAIN)
 			{
 				close(sock);
 				reporter->print_log("ERROR", "Failed to accept new client on socket");
 				return;
-			}
+			}*/
 			goto readClients;
 		}
 		if (clients.size() >= 3)
