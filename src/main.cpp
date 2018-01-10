@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 10:03:56 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 11:36:34 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,8 @@ void				test_pass(int sock)
 {
 	int		ret;
 	char	buff[1024];
-	char	*line;
 
 	ret = 0;
-	line = NULL;
 	buff[0] = '\0';
 	reporter->print_log("INFO", "Enter");
 	while ((ret = recv(sock, &buff, 999, 0)) > 0)
