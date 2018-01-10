@@ -6,7 +6,7 @@
 /*   By: ddevico <ddevico@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/01/08 15:07:11 by ddevico           #+#    #+#             */
-/*   Updated: 2018/01/10 13:48:16 by davydevico       ###   ########.fr       */
+/*   Updated: 2018/01/10 13:49:40 by davydevico       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,125 +52,10 @@ void				test_pass(int sock)
 	}
 }
 
-void loop (int sock)
-{
-	struct pollfd tmp;
-	std::vector<struct pollfd> polls;
-	std::vector<int> clients;
-	std::vector<std::string> datas;
-	while (true)
-	{
-		struct sockaddr sa;
-		socklen_t sl;
-		int newsock;
-		if ((newsock = accept(sock, &sa, &sl)) == -1)
-		{
-			if (errno != EWOULDBLOCK && errno != EAGAIN)
-			{
-				close(sock);
-				reporter->print_log("ERROR", "Failed to accept new client on socket");
-				return;
-			}
-			goto readClients;
-		}
-		if (clients.size() >= 3)
-		{
-			close(newsock);
-			reporter->print_log("INFO", "Client number limit reached");
-			goto readClients;
-		}
-		struct timeval tv;
-		tv.tv_sec = 0;
-		tv.tv_usec = 100000;
-		if (setsockopt(newsock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
-		{
-			close(sock);
-			reporter->print_log("ERROR", "Failed setsockopt timeout");
-			return;
-		}
-		reporter->print_log("INFO", "New client");
-		clients.push_back(newsock);
-		tmp.fd = newsock;
-		tmp.events = POLLIN | POLLPRI;
-		tmp.revents = 0;
-		polls.push_back(tmp);
-		datas.push_back(std::string());
-readClients:
-		poll(&polls.front(), polls.size(), 10);
-		for (int i = 0; i < static_cast<int>(clients.size()); ++i)
-		{
-			ssize_t result;
-			char res;
-			while ((result = recv(clients[i], &res, 1, MSG_NOSIGNAL)) > 0)
-			{
-				if (res == '\n')
-				{
-					if (!datas[i].compare("quit"))
-					{
-						close(sock);
-						reporter->print_log("INFO", "Request quit");
-						return;
-					}
-					reporter->print_log("INFO", "User input: " + datas[i]);
-					datas[i].clear();
-				}
-				else
-					datas[i] += res;
-			}
-			if (result == 0 || (result == -1 && errno != EWOULDBLOCK && errno != EAGAIN))
-			{
-				reporter->print_log("INFO", "Client shutdown");
-				clients.erase(clients.begin() + i);
-				datas.erase(datas.begin() + i);
-				i--;
-			}
-		}
-	}
-}
-
 void listen(int sock)
 {
 	struct pollfd tmp;
 	std::vector<struct pollfd> polls;
-	/*reporter->print_log("INFO", "Creating server");
-	int sock;
-	if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
-	{
-		reporter->print_log("ERROR", "Failed to create socket");
-		return;
-	}
-	struct sockaddr_in server_addr;
-	std::memset((char *)&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(4242);
-	if (bind(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to bind socket");
-		return;
-	}
-	if (listen(sock, 255) == -1)
-	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to listen socket");
-		return;
-	}
-	int flags = fcntl(sock, F_GETFL, 0);
-	if (flags < 0)
-	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to set non blocking socket on client");
-		return;
-	}
-	flags |= O_NONBLOCK;
-	if (fcntl(sock, F_SETFL, flags) == -1)
-	{
-		close(sock);
-		reporter->print_log("ERROR", "Failed to set non blocking socket");
-		return;
-	}
-	reporter->print_log("INFO", "Created server");*/
 	std::vector<int> clients;
 	std::vector<std::string> datas;
 	while (true)
